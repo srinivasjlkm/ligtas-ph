@@ -164,60 +164,60 @@ const DEFAULT_GOBAG = {
 };
 
 const HOTLINES = [
-  {name:"NDRRMC",number:"911",desc:{en:"National Emergency",tl:"Pambansang Emergency"}},
-  {name:"PAGASA",number:"(02) 8284-0800",desc:{en:"Weather & Typhoon",tl:"Panahon at Bagyo"}},
-  {name:"PHIVOLCS",number:"(02) 8426-1468",desc:{en:"Earthquake & Volcano",tl:"Lindol at Bulkan"}},
-  {name:"Red Cross PH",number:"143",desc:{en:"Emergency Medical",tl:"Emergency Medikal"}},
-  {name:"Coast Guard",number:"(02) 8527-3877",desc:{en:"Maritime & Tsunami",tl:"Dagat at Tsunami"}},
-  {name:"DSWD",number:"1-800-100-DSWD",desc:{en:"Disaster Relief",tl:"Relief at Tulong"}},
+  {name:"NDRRMC",       number:"911",              dial:"911",           desc:{en:"National Emergency",       tl:"Pambansang Emergency"}},
+  {name:"PAGASA",       number:"(02) 8284-0800",   dial:"0282840800",    desc:{en:"Weather & Typhoon",        tl:"Panahon at Bagyo"}},
+  {name:"PHIVOLCS",     number:"(02) 8426-1468",   dial:"0284261468",    desc:{en:"Earthquake & Volcano",     tl:"Lindol at Bulkan"}},
+  {name:"Red Cross PH", number:"143",              dial:"143",           desc:{en:"Emergency Medical",        tl:"Emergency Medikal"}},
+  {name:"Coast Guard",  number:"(02) 8527-3877",   dial:"0285273877",    desc:{en:"Maritime & Tsunami",       tl:"Dagat at Tsunami"}},
+  {name:"DSWD",         number:"1-800-100-DSWD",   dial:"18001003793",   desc:{en:"Disaster Relief",          tl:"Relief at Tulong"}},
 ];
 
 const EVAC_DB = [
-  {region:"NCR",city:"Manila",name:"Rizal Memorial Sports Complex",address:"Pablo Ocampo Sr. St, Malate",type:"Sports Complex",capacity:"5,000+"},
-  {region:"NCR",city:"Manila",name:"Cuneta Astrodome",address:"EDSA, Pasay",type:"Astrodome",capacity:"4,000+"},
-  {region:"NCR",city:"Manila",name:"Rajah Sulayman Grandstand",address:"Fort Santiago, Intramuros",type:"Grandstand",capacity:"3,000+"},
-  {region:"NCR",city:"Quezon City",name:"Quezon Memorial Circle",address:"Elliptical Rd, Diliman",type:"Open Area",capacity:"10,000+"},
-  {region:"NCR",city:"Quezon City",name:"Amoranto Sports Complex",address:"Amoranto Ave, QC",type:"Sports Complex",capacity:"3,000+"},
-  {region:"NCR",city:"Makati",name:"Makati Coliseum",address:"Vito Cruz Extension",type:"Coliseum",capacity:"5,000+"},
-  {region:"NCR",city:"Pasig",name:"Pasig City Sports Center",address:"F. Legaspi St, Pasig",type:"Sports Complex",capacity:"2,000+"},
-  {region:"NCR",city:"Taguig",name:"Signal Village National High School",address:"Signal Village, Taguig",type:"School",capacity:"1,000+"},
-  {region:"NCR",city:"Marikina",name:"Marikina Sports Center",address:"Shoe Ave, Marikina",type:"Sports Complex",capacity:"3,000+"},
-  {region:"NCR",city:"Valenzuela",name:"Valenzuela Astrodome",address:"McArthur Hwy, Valenzuela",type:"Astrodome",capacity:"5,000+"},
-  {region:"NCR",city:"Caloocan",name:"Caloocan Sports Complex",address:"10th Ave, Caloocan",type:"Sports Complex",capacity:"2,000+"},
-  {region:"NCR",city:"Parañaque",name:"Parañaque City Sports Complex",address:"BF Homes, Parañaque",type:"Sports Complex",capacity:"2,000+"},
-  {region:"Region I",city:"Laoag",name:"Laoag City Sports Complex",address:"Laoag, Ilocos Norte",type:"Sports Complex",capacity:"2,000+"},
-  {region:"Region I",city:"Vigan",name:"Plaza Salcedo",address:"Vigan, Ilocos Sur",type:"Open Area",capacity:"2,000+"},
-  {region:"Region I",city:"Dagupan",name:"Dagupan City Gymnasium",address:"AB Fernandez Ave, Dagupan",type:"Gymnasium",capacity:"2,000+"},
-  {region:"Region II",city:"Tuguegarao",name:"Tuguegarao City Sports Complex",address:"Tuguegarao, Cagayan",type:"Sports Complex",capacity:"2,000+"},
-  {region:"Region II",city:"Santiago",name:"Santiago City Sports Complex",address:"Santiago, Isabela",type:"Sports Complex",capacity:"2,000+"},
-  {region:"Region III",city:"San Fernando",name:"Pampanga Sports Complex",address:"Jose Abad Santos Ave",type:"Sports Complex",capacity:"5,000+"},
-  {region:"Region III",city:"Angeles",name:"Angeles City Sports Complex",address:"Sto. Rosario St",type:"Sports Complex",capacity:"3,000+"},
-  {region:"Region III",city:"Tarlac City",name:"Tarlac Sports Complex",address:"MacArthur Hwy",type:"Sports Complex",capacity:"3,000+"},
-  {region:"Region III",city:"Cabanatuan",name:"Cabanatuan Sports Complex",address:"Burgos Ave, Cabanatuan",type:"Sports Complex",capacity:"2,000+"},
-  {region:"Region IV-A",city:"Antipolo",name:"Antipolo Sports Complex",address:"M.L. Quezon Ave",type:"Sports Complex",capacity:"2,000+"},
-  {region:"Region IV-A",city:"Batangas City",name:"Batangas City Coliseum",address:"JP Laurel Hwy",type:"Coliseum",capacity:"3,000+"},
-  {region:"Region IV-A",city:"Calamba",name:"Calamba Sports Complex",address:"Real St, Calamba",type:"Sports Complex",capacity:"2,000+"},
-  {region:"Region IV-A",city:"Lucena",name:"Quezon Convention Center",address:"Quezon Ave, Lucena",type:"Convention Center",capacity:"3,000+"},
-  {region:"Region V",city:"Legazpi",name:"Legazpi City Sports Complex",address:"Washington Drive",type:"Sports Complex",capacity:"3,000+"},
-  {region:"Region V",city:"Naga",name:"Naga City Sports Complex",address:"Triangulo, Naga City",type:"Sports Complex",capacity:"3,000+"},
-  {region:"Region V",city:"Sorsogon",name:"Sorsogon City Gymnasium",address:"Magsaysay St",type:"Gymnasium",capacity:"1,500+"},
-  {region:"Region VI",city:"Iloilo City",name:"Iloilo Sports Complex",address:"Benigno Aquino Ave",type:"Sports Complex",capacity:"5,000+"},
-  {region:"Region VI",city:"Bacolod",name:"Bacolod City Sports Complex",address:"BS Aquino Drive",type:"Sports Complex",capacity:"5,000+"},
-  {region:"Region VII",city:"Cebu City",name:"Cebu City Sports Complex",address:"Osmena Blvd",type:"Sports Complex",capacity:"8,000+"},
-  {region:"Region VII",city:"Mandaue",name:"Mandaue City Sports Complex",address:"A.C. Cortes Ave",type:"Sports Complex",capacity:"3,000+"},
-  {region:"Region VII",city:"Lapu-Lapu",name:"Lapu-Lapu City Coliseum",address:"Pusok, Lapu-Lapu",type:"Coliseum",capacity:"3,000+"},
-  {region:"Region VII",city:"Dumaguete",name:"Silliman University Courts",address:"Hibbard Ave, Dumaguete",type:"School",capacity:"2,000+"},
-  {region:"Region VIII",city:"Tacloban",name:"Tacloban City Astrodome",address:"Justice Romualdez St",type:"Astrodome",capacity:"5,000+"},
-  {region:"Region VIII",city:"Ormoc",name:"Ormoc City Sports Complex",address:"Cogon District",type:"Sports Complex",capacity:"2,000+"},
-  {region:"Region IX",city:"Zamboanga City",name:"JF Enriquez Memorial Sports Complex",address:"Veteran's Ave",type:"Sports Complex",capacity:"5,000+"},
-  {region:"Region X",city:"Cagayan de Oro",name:"Pelagio Aplaya Sports Complex",address:"Velez St, CDO",type:"Sports Complex",capacity:"5,000+"},
-  {region:"Region X",city:"Iligan",name:"Iligan City Sports Complex",address:"Gen. Paulino Santos Ave",type:"Sports Complex",capacity:"3,000+"},
-  {region:"Region XI",city:"Davao City",name:"San Pedro Sports Complex",address:"Ilustre St, Davao",type:"Sports Complex",capacity:"5,000+"},
-  {region:"Region XI",city:"Tagum",name:"Tagum City Sports Complex",address:"Tagum City Proper",type:"Sports Complex",capacity:"2,000+"},
-  {region:"Region XII",city:"General Santos",name:"General Santos Sports Complex",address:"Pioneer Ave",type:"Sports Complex",capacity:"5,000+"},
-  {region:"Region XII",city:"Cotabato City",name:"Cotabato City Sports Complex",address:"Makakua St",type:"Sports Complex",capacity:"2,000+"},
-  {region:"CAR",city:"Baguio",name:"Baguio City Athletic Bowl",address:"Leonard Wood Rd",type:"Sports Complex",capacity:"5,000+"},
-  {region:"BARMM",city:"Cotabato",name:"Shariff Kabunsuan Cultural Complex",address:"Don Rufino Alonzo St",type:"Cultural Complex",capacity:"3,000+"},
+  {region:"NCR",city:"Manila",name:"Rizal Memorial Sports Complex",address:"Pablo Ocampo Sr. St, Malate, Manila",type:"Sports Complex",capacity:"5,000+",lat:14.5561,lng:120.9893},
+  {region:"NCR",city:"Manila",name:"Cuneta Astrodome",address:"EDSA cor. Arsenia St, Pasay",type:"Astrodome",capacity:"4,000+",lat:14.5567,lng:121.0014},
+  {region:"NCR",city:"Manila",name:"Rajah Sulayman Grandstand",address:"Fort Santiago, Intramuros, Manila",type:"Grandstand",capacity:"3,000+",lat:14.5942,lng:120.9718},
+  {region:"NCR",city:"Quezon City",name:"Quezon Memorial Circle",address:"Elliptical Rd, Diliman, Quezon City",type:"Open Area",capacity:"10,000+",lat:14.6516,lng:121.0436},
+  {region:"NCR",city:"Quezon City",name:"Amoranto Sports Complex",address:"Amoranto Ave, Quezon City",type:"Sports Complex",capacity:"3,000+",lat:14.6407,lng:121.0069},
+  {region:"NCR",city:"Makati",name:"Makati Coliseum",address:"Vito Cruz Extension, Makati",type:"Coliseum",capacity:"5,000+",lat:14.5519,lng:121.0182},
+  {region:"NCR",city:"Pasig",name:"Pasig City Sports Center",address:"F. Legaspi St, Pasig City",type:"Sports Complex",capacity:"2,000+",lat:14.5764,lng:121.0851},
+  {region:"NCR",city:"Taguig",name:"Signal Village National High School",address:"Signal Village, Taguig",type:"School",capacity:"1,000+",lat:14.5200,lng:121.0530},
+  {region:"NCR",city:"Marikina",name:"Marikina Sports Center",address:"Shoe Ave, Marikina City",type:"Sports Complex",capacity:"3,000+",lat:14.6507,lng:121.1029},
+  {region:"NCR",city:"Valenzuela",name:"Valenzuela Astrodome",address:"McArthur Hwy, Valenzuela City",type:"Astrodome",capacity:"5,000+",lat:14.7011,lng:120.9830},
+  {region:"NCR",city:"Caloocan",name:"Caloocan Sports Complex",address:"10th Ave, Caloocan City",type:"Sports Complex",capacity:"2,000+",lat:14.6498,lng:120.9720},
+  {region:"NCR",city:"Parañaque",name:"Parañaque City Sports Complex",address:"BF Homes, Parañaque City",type:"Sports Complex",capacity:"2,000+",lat:14.4793,lng:121.0198},
+  {region:"Region I",city:"Laoag",name:"Laoag City Sports Complex",address:"Laoag City, Ilocos Norte",type:"Sports Complex",capacity:"2,000+",lat:18.1977,lng:120.5937},
+  {region:"Region I",city:"Vigan",name:"Plaza Salcedo",address:"Vigan City, Ilocos Sur",type:"Open Area",capacity:"2,000+",lat:17.5747,lng:120.3870},
+  {region:"Region I",city:"Dagupan",name:"Dagupan City Gymnasium",address:"AB Fernandez Ave, Dagupan",type:"Gymnasium",capacity:"2,000+",lat:16.0430,lng:120.3333},
+  {region:"Region II",city:"Tuguegarao",name:"Tuguegarao City Sports Complex",address:"Tuguegarao City, Cagayan",type:"Sports Complex",capacity:"2,000+",lat:17.6132,lng:121.7270},
+  {region:"Region II",city:"Santiago",name:"Santiago City Sports Complex",address:"Santiago City, Isabela",type:"Sports Complex",capacity:"2,000+",lat:16.6877,lng:121.5503},
+  {region:"Region III",city:"San Fernando",name:"Pampanga Sports Complex",address:"Jose Abad Santos Ave, San Fernando",type:"Sports Complex",capacity:"5,000+",lat:15.0285,lng:120.6890},
+  {region:"Region III",city:"Angeles",name:"Angeles City Sports Complex",address:"Sto. Rosario St, Angeles City",type:"Sports Complex",capacity:"3,000+",lat:15.1450,lng:120.5887},
+  {region:"Region III",city:"Tarlac City",name:"Tarlac Sports Complex",address:"MacArthur Hwy, Tarlac City",type:"Sports Complex",capacity:"3,000+",lat:15.4755,lng:120.5963},
+  {region:"Region III",city:"Cabanatuan",name:"Cabanatuan Sports Complex",address:"Burgos Ave, Cabanatuan City",type:"Sports Complex",capacity:"2,000+",lat:15.4866,lng:120.9669},
+  {region:"Region IV-A",city:"Antipolo",name:"Antipolo Sports Complex",address:"M.L. Quezon Ave, Antipolo",type:"Sports Complex",capacity:"2,000+",lat:14.5862,lng:121.1748},
+  {region:"Region IV-A",city:"Batangas City",name:"Batangas City Coliseum",address:"JP Laurel Hwy, Batangas City",type:"Coliseum",capacity:"3,000+",lat:13.7565,lng:121.0583},
+  {region:"Region IV-A",city:"Calamba",name:"Calamba Sports Complex",address:"Real St, Calamba, Laguna",type:"Sports Complex",capacity:"2,000+",lat:14.2115,lng:121.1653},
+  {region:"Region IV-A",city:"Lucena",name:"Quezon Convention Center",address:"Quezon Ave, Lucena City",type:"Convention Center",capacity:"3,000+",lat:13.9373,lng:121.6170},
+  {region:"Region V",city:"Legazpi",name:"Legazpi City Sports Complex",address:"Washington Drive, Legazpi City",type:"Sports Complex",capacity:"3,000+",lat:13.1391,lng:123.7438},
+  {region:"Region V",city:"Naga",name:"Naga City Sports Complex",address:"Triangulo, Naga City",type:"Sports Complex",capacity:"3,000+",lat:13.6218,lng:123.1945},
+  {region:"Region V",city:"Sorsogon",name:"Sorsogon City Gymnasium",address:"Magsaysay St, Sorsogon City",type:"Gymnasium",capacity:"1,500+",lat:12.9742,lng:124.0058},
+  {region:"Region VI",city:"Iloilo City",name:"Iloilo Sports Complex",address:"Benigno Aquino Ave, Iloilo City",type:"Sports Complex",capacity:"5,000+",lat:10.7202,lng:122.5621},
+  {region:"Region VI",city:"Bacolod",name:"Bacolod City Sports Complex",address:"BS Aquino Drive, Bacolod City",type:"Sports Complex",capacity:"5,000+",lat:10.6402,lng:122.9822},
+  {region:"Region VII",city:"Cebu City",name:"Cebu City Sports Complex",address:"Osmena Blvd, Cebu City",type:"Sports Complex",capacity:"8,000+",lat:10.3000,lng:123.8934},
+  {region:"Region VII",city:"Mandaue",name:"Mandaue City Sports Complex",address:"A.C. Cortes Ave, Mandaue",type:"Sports Complex",capacity:"3,000+",lat:10.3236,lng:123.9223},
+  {region:"Region VII",city:"Lapu-Lapu",name:"Lapu-Lapu City Coliseum",address:"Pusok, Lapu-Lapu City",type:"Coliseum",capacity:"3,000+",lat:10.3103,lng:123.9494},
+  {region:"Region VII",city:"Dumaguete",name:"Silliman University Courts",address:"Hibbard Ave, Dumaguete City",type:"School",capacity:"2,000+",lat:9.3103,lng:123.3081},
+  {region:"Region VIII",city:"Tacloban",name:"Tacloban City Astrodome",address:"Justice Romualdez St, Tacloban",type:"Astrodome",capacity:"5,000+",lat:11.2543,lng:124.9973},
+  {region:"Region VIII",city:"Ormoc",name:"Ormoc City Sports Complex",address:"Cogon District, Ormoc City",type:"Sports Complex",capacity:"2,000+",lat:11.0050,lng:124.6076},
+  {region:"Region IX",city:"Zamboanga City",name:"JF Enriquez Memorial Sports Complex",address:"Veteran's Ave, Zamboanga City",type:"Sports Complex",capacity:"5,000+",lat:6.9214,lng:122.0790},
+  {region:"Region X",city:"Cagayan de Oro",name:"Pelagio Aplaya Sports Complex",address:"Velez St, Cagayan de Oro",type:"Sports Complex",capacity:"5,000+",lat:8.4822,lng:124.6472},
+  {region:"Region X",city:"Iligan",name:"Iligan City Sports Complex",address:"Gen. Paulino Santos Ave, Iligan",type:"Sports Complex",capacity:"3,000+",lat:8.2280,lng:124.2452},
+  {region:"Region XI",city:"Davao City",name:"San Pedro Sports Complex",address:"Ilustre St, Davao City",type:"Sports Complex",capacity:"5,000+",lat:7.0731,lng:125.6128},
+  {region:"Region XI",city:"Tagum",name:"Tagum City Sports Complex",address:"Tagum City, Davao del Norte",type:"Sports Complex",capacity:"2,000+",lat:7.4478,lng:125.8078},
+  {region:"Region XII",city:"General Santos",name:"General Santos Sports Complex",address:"Pioneer Ave, General Santos City",type:"Sports Complex",capacity:"5,000+",lat:6.1128,lng:125.1717},
+  {region:"Region XII",city:"Cotabato City",name:"Cotabato City Sports Complex",address:"Makakua St, Cotabato City",type:"Sports Complex",capacity:"2,000+",lat:7.2236,lng:124.2530},
+  {region:"CAR",city:"Baguio",name:"Baguio City Athletic Bowl",address:"Leonard Wood Rd, Baguio City",type:"Sports Complex",capacity:"5,000+",lat:16.4116,lng:120.5930},
+  {region:"BARMM",city:"Cotabato",name:"Shariff Kabunsuan Cultural Complex",address:"Don Rufino Alonzo St, Cotabato City",type:"Cultural Complex",capacity:"3,000+",lat:7.2167,lng:124.2500},
 ];
 
 const REGIONS = ["All",...Array.from(new Set(EVAC_DB.map(e=>e.region))).sort()];
@@ -237,6 +237,8 @@ const Ico = {
   navPhone:<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 12 19.79 19.79 0 011.61 3.38 2 2 0 013.59 1.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.91 8.72a16 16 0 006.37 6.37l.91-.91a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/></svg>,
   navEvac: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/><polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/></svg>,
   shield:  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/></svg>,
+  maps:    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.6"/></svg>,
+  phone:   <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 12 19.79 19.79 0 011.61 3.38 2 2 0 013.59 1.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.91 8.72a16 16 0 006.37 6.37l.91-.91a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/></svg>,
 };
 
 // ─── Glass card style helper ──────────────────────────────────────
@@ -560,6 +562,12 @@ function GoBagScreen({ lang, t }) {
 
 // ─── Hotlines ─────────────────────────────────────────────────────
 function HotlinesScreen({ lang, t }) {
+  const [pressed, setPressed] = useState(null);
+
+  const call = (h) => {
+    window.location.href = `tel:${h.dial}`;
+  };
+
   return (
     <div style={{padding:"20px 20px 0"}}>
       <div style={{...glassCard({padding:"13px 16px", marginBottom:20, borderRadius:16}),
@@ -569,20 +577,42 @@ function HotlinesScreen({ lang, t }) {
 
       <div style={{display:"flex", flexDirection:"column", gap:8, marginBottom:20}}>
         {HOTLINES.map((h,i)=>(
-          <div key={i} style={{...glassCard({padding:"15px 18px", borderRadius:18}), display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-            <div>
-              <div style={{color:glass.textPrimary, fontWeight:600, fontSize:15, fontFamily:font}}>{h.name}</div>
-              <div style={{color:glass.textSecond, fontSize:12, marginTop:2}}>{h.desc[lang]}</div>
-            </div>
+          <a key={i} href={`tel:${h.dial}`}
+            style={{textDecoration:"none", display:"block"}}
+            onMouseDown={()=>setPressed(i)} onMouseUp={()=>setPressed(null)}
+            onTouchStart={()=>setPressed(i)} onTouchEnd={()=>setPressed(null)}>
             <div style={{
-              background:"rgba(255,255,255,0.10)", backdropFilter:"blur(20px)",
-              border:`1px solid ${glass.borderHi}`,
-              borderRadius:12, padding:"8px 14px",
-              color:glass.white, fontWeight:600, fontSize:14, fontFamily:font,
-              letterSpacing:0.3,
-              boxShadow:"inset 0 1px 0 rgba(255,255,255,0.18)",
-            }}>{h.number}</div>
-          </div>
+              ...glassCard({padding:"15px 18px", borderRadius:18}),
+              display:"flex", justifyContent:"space-between", alignItems:"center",
+              background: pressed===i ? "rgba(255,255,255,0.14)" : glass.card,
+              transform: pressed===i ? "scale(0.98)" : "scale(1)",
+              transition:"all 0.15s cubic-bezier(.4,0,.2,1)",
+              cursor:"pointer",
+            }}>
+              <div style={{flex:1}}>
+                <div style={{color:glass.textPrimary, fontWeight:600, fontSize:15, fontFamily:font}}>{h.name}</div>
+                <div style={{color:glass.textSecond, fontSize:12, marginTop:2}}>{h.desc[lang]}</div>
+              </div>
+              {/* Number pill + phone icon */}
+              <div style={{display:"flex", alignItems:"center", gap:10}}>
+                <div style={{
+                  background:"rgba(255,255,255,0.10)", backdropFilter:"blur(20px)",
+                  border:`1px solid ${glass.borderHi}`,
+                  borderRadius:12, padding:"8px 14px",
+                  color:glass.white, fontWeight:600, fontSize:13, fontFamily:font,
+                  letterSpacing:0.3,
+                  boxShadow:"inset 0 1px 0 rgba(255,255,255,0.18)",
+                }}>{h.number}</div>
+                <div style={{
+                  width:34, height:34, borderRadius:10,
+                  background:"rgba(48,191,160,0.18)",
+                  border:"1px solid rgba(48,191,160,0.3)",
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                  color:"rgba(80,220,190,0.9)", flexShrink:0,
+                }}>{Ico.phone}</div>
+              </div>
+            </div>
+          </a>
         ))}
       </div>
 
@@ -681,19 +711,37 @@ function EvacScreen({ lang, t }) {
 
         {myCenters.length===0 ? (
           <div style={{...glassCard({padding:"18px", borderRadius:16, textAlign:"center"}), color:glass.textTertiary, fontSize:13}}>{t.evacMyEmpty}</div>
-        ) : myCenters.map(c=>(
-          <div key={c.id} style={{...glassCard({padding:"14px 16px", marginBottom:8, borderRadius:18}), border:"1px solid rgba(255,200,80,0.2)"}}>
-            <div style={{display:"flex", justifyContent:"space-between", alignItems:"flex-start"}}>
-              <div style={{flex:1}}>
-                <div style={{color:glass.textPrimary, fontWeight:600, fontSize:14, fontFamily:font}}>{c.name}</div>
-                {c.address&&<div style={{color:glass.textSecond, fontSize:12, marginTop:3, display:"flex", gap:5, alignItems:"center"}}>{Ico.pin}{c.address}</div>}
-                {c.notes&&<div style={{color:glass.textTertiary, fontSize:12, marginTop:3, fontStyle:"italic"}}>{c.notes}</div>}
-                <div style={{marginTop:7}}><Pill color="rgba(255,200,80,0.9)">{t.evacUserLabel}</Pill></div>
+        ) : myCenters.map(c=>{
+          const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((c.address||c.name)+' Philippines')}`;
+          return (
+            <div key={c.id} style={{...glassCard({padding:"14px 16px", marginBottom:8, borderRadius:18}), border:"1px solid rgba(255,200,80,0.2)"}}>
+              <div style={{display:"flex", justifyContent:"space-between", alignItems:"flex-start"}}>
+                <div style={{flex:1}}>
+                  <div style={{color:glass.textPrimary, fontWeight:600, fontSize:14, fontFamily:font}}>{c.name}</div>
+                  {c.address&&(
+                    <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
+                      style={{textDecoration:"none", display:"flex", gap:5, alignItems:"center", marginTop:4}}>
+                      <span style={{color:"rgba(100,180,255,0.8)", fontSize:12}}>{Ico.pin}</span>
+                      <span style={{color:"rgba(100,180,255,0.8)", fontSize:12, textDecoration:"underline", textDecorationColor:"rgba(100,180,255,0.3)"}}>{c.address}</span>
+                    </a>
+                  )}
+                  {c.notes&&<div style={{color:glass.textTertiary, fontSize:12, marginTop:3, fontStyle:"italic"}}>{c.notes}</div>}
+                  <div style={{marginTop:7, display:"flex", gap:6, alignItems:"center"}}>
+                    <Pill color="rgba(255,200,80,0.9)">{t.evacUserLabel}</Pill>
+                    {c.address&&(
+                      <a href={mapsUrl} target="_blank" rel="noopener noreferrer" style={{textDecoration:"none"}}>
+                        <div style={{display:"flex", alignItems:"center", gap:4, background:"rgba(74,158,255,0.12)", border:"1px solid rgba(74,158,255,0.22)", borderRadius:20, padding:"3px 9px", color:"rgba(100,180,255,0.85)", fontSize:11, fontWeight:600}}>
+                          {Ico.maps} <span>Maps</span>
+                        </div>
+                      </a>
+                    )}
+                  </div>
+                </div>
+                <button onClick={()=>setMyCenters(p=>p.filter(x=>x.id!==c.id))} style={{background:"transparent", border:"none", color:glass.textTertiary, cursor:"pointer", padding:4, display:"flex"}}>{Ico.trash}</button>
               </div>
-              <button onClick={()=>setMyCenters(p=>p.filter(x=>x.id!==c.id))} style={{background:"transparent", border:"none", color:glass.textTertiary, cursor:"pointer", padding:4, display:"flex"}}>{Ico.trash}</button>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Divider */}
@@ -708,17 +756,45 @@ function EvacScreen({ lang, t }) {
         <div key={city} style={{marginBottom:16}}>
           <div style={{color:glass.textSecond, fontWeight:600, fontSize:11, marginBottom:8, letterSpacing:1.2, textTransform:"uppercase"}}>{city}</div>
           <div style={{display:"flex", flexDirection:"column", gap:7}}>
-            {centers.map((c,i)=>(
-              <div key={i} style={{...glassCard({padding:"14px 16px", borderRadius:16})}}>
-                <div style={{color:glass.textPrimary, fontWeight:500, fontSize:14, fontFamily:font, marginBottom:5}}>{c.name}</div>
-                <div style={{color:glass.textSecond, fontSize:12, display:"flex", gap:5, alignItems:"center", marginBottom:7}}>{Ico.pin}{c.address}</div>
-                <div style={{display:"flex", gap:6, flexWrap:"wrap"}}>
-                  <Pill>{c.type}</Pill>
-                  <Pill color="rgba(48,191,160,0.8)">👥 {c.capacity}</Pill>
-                  <Pill color="rgba(48,191,160,0.8)">{t.evacGovLabel}</Pill>
-                </div>
-              </div>
-            ))}
+            {centers.map((c,i)=>{
+              const mapsUrl = c.lat && c.lng
+                ? `https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lng}`
+                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.name+' '+c.address+' Philippines')}`;
+              return (
+                <a key={i} href={mapsUrl} target="_blank" rel="noopener noreferrer"
+                  style={{textDecoration:"none", display:"block"}}>
+                  <div style={{
+                    ...glassCard({padding:"14px 16px", borderRadius:16}),
+                    cursor:"pointer", transition:"all 0.18s cubic-bezier(.4,0,.2,1)",
+                  }}
+                    onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,0.13)"; e.currentTarget.style.transform="scale(1.01)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.background=glass.card; e.currentTarget.style.transform="scale(1)";}}
+                    onTouchStart={e=>{e.currentTarget.style.background="rgba(255,255,255,0.16)"; e.currentTarget.style.transform="scale(0.98)";}}
+                    onTouchEnd={e=>{e.currentTarget.style.background=glass.card; e.currentTarget.style.transform="scale(1)";}}
+                  >
+                    <div style={{display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:10}}>
+                      <div style={{flex:1}}>
+                        <div style={{color:glass.textPrimary, fontWeight:500, fontSize:14, fontFamily:font, marginBottom:5}}>{c.name}</div>
+                        <div style={{color:glass.textSecond, fontSize:12, display:"flex", gap:5, alignItems:"center", marginBottom:7}}>{Ico.pin}{c.address}</div>
+                        <div style={{display:"flex", gap:6, flexWrap:"wrap"}}>
+                          <Pill>{c.type}</Pill>
+                          <Pill color="rgba(48,191,160,0.8)">👥 {c.capacity}</Pill>
+                          <Pill color="rgba(48,191,160,0.8)">{t.evacGovLabel}</Pill>
+                        </div>
+                      </div>
+                      {/* Maps button */}
+                      <div style={{
+                        width:36, height:36, minWidth:36, borderRadius:11,
+                        background:"rgba(74,158,255,0.15)",
+                        border:"1px solid rgba(74,158,255,0.25)",
+                        display:"flex", alignItems:"center", justifyContent:"center",
+                        color:"rgba(100,180,255,0.9)", flexShrink:0, marginTop:2,
+                      }}>{Ico.maps}</div>
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
           </div>
         </div>
       ))}
