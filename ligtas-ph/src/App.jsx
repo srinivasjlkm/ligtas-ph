@@ -239,6 +239,8 @@ const Ico = {
   shield:  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/></svg>,
   maps:    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.6"/></svg>,
   phone:   <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 12 19.79 19.79 0 011.61 3.38 2 2 0 013.59 1.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.91 8.72a16 16 0 006.37 6.37l.91-.91a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/></svg>,
+  expand:  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M8 3H5a2 2 0 00-2 2v3M16 3h3a2 2 0 012 2v3M21 16v3a2 2 0 01-2 2h-3M3 16v3a2 2 0 002 2h3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  close:   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
 };
 
 // ─── Glass card style helper ──────────────────────────────────────
@@ -624,6 +626,207 @@ function HotlinesScreen({ lang, t }) {
   );
 }
 
+// ─── Lightweight Philippines projection ────────────────────────
+// Simple linear lat/lng → x/y box projection tuned to PH bounding box,
+// good enough for a stylised offline pin map (not a literal coastline).
+const PH_BOUNDS = { latMin:4.5, latMax:21.5, lngMin:116.5, lngMax:127 };
+function project(lat, lng, w, h) {
+  const x = ((lng - PH_BOUNDS.lngMin) / (PH_BOUNDS.lngMax - PH_BOUNDS.lngMin)) * w;
+  const y = h - ((lat - PH_BOUNDS.latMin) / (PH_BOUNDS.latMax - PH_BOUNDS.latMin)) * h;
+  return { x, y };
+}
+
+// Simplified PH landmass silhouette (stylised blob group, not geographically precise —
+// purely for visual context behind the pins, fully offline / no map tiles needed)
+const PH_SILHOUETTE = (
+  <g fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.10)" strokeWidth="0.5">
+    {/* Luzon */}
+    <path d="M58 18 L66 14 L72 20 L70 32 L74 42 L68 56 L60 64 L52 70 L46 80 L40 88 L36 96 L40 100 L36 106 L28 108 L24 100 L28 90 L26 80 L30 68 L34 56 L38 44 L42 32 L48 24 Z"/>
+    {/* Visayas cluster */}
+    <path d="M44 118 L52 114 L60 118 L58 126 L50 130 L42 126 Z"/>
+    <path d="M62 122 L70 120 L76 126 L72 134 L64 132 Z"/>
+    <path d="M50 134 L58 132 L62 140 L56 146 L48 142 Z"/>
+    {/* Mindanao */}
+    <path d="M58 150 L70 146 L82 150 L88 160 L84 172 L74 180 L62 178 L52 170 L48 160 Z"/>
+    {/* Palawan sliver */}
+    <path d="M18 70 L24 68 L26 84 L22 100 L16 98 L14 84 Z"/>
+  </g>
+);
+
+// ─── Map Pin (shared) ──────────────────────────────────────────
+function MapPin({ x, y, active, color="#4A9EFF", size=1, onClick }) {
+  return (
+    <g transform={`translate(${x},${y})`} onClick={onClick} style={{cursor:onClick?"pointer":"default"}}>
+      {active && <circle r={9*size} fill={color} opacity="0.25"><animate attributeName="r" values={`${6*size};${11*size};${6*size}`} dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.35;0.05;0.35" dur="2s" repeatCount="indefinite"/></circle>}
+      <circle r={4.2*size} fill={color} stroke="rgba(8,12,18,0.8)" strokeWidth="1"/>
+      <circle r={1.4*size} fill="rgba(255,255,255,0.9)"/>
+    </g>
+  );
+}
+
+// ─── Mini Map Preview (collapsed, tappable to expand) ──────────
+function MiniMapPreview({ centers, onExpand }) {
+  const W = 200, H = 170;
+  return (
+    <button onClick={onExpand} style={{
+      width:"100%", border:"none", padding:0, cursor:"pointer",
+      borderRadius:20, overflow:"hidden", position:"relative",
+      background: glass.card,
+      backdropFilter:"blur(20px) saturate(180%)",
+      WebkitBackdropFilter:"blur(20px) saturate(180%)",
+      border1:`1px solid ${glass.border}`,
+    }}>
+      <div style={{position:"relative", border:`1px solid ${glass.border}`, borderRadius:20, overflow:"hidden"}}>
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="170" style={{display:"block", background:"linear-gradient(160deg, rgba(20,40,70,0.5), rgba(10,20,35,0.7))"}}>
+          {PH_SILHOUETTE}
+          {centers.slice(0,60).map((c,i)=>{
+            const p = project(c.lat, c.lng, W, H);
+            return <MapPin key={i} x={p.x} y={p.y} color="#4A9EFF" size={0.7}/>;
+          })}
+        </svg>
+        {/* Overlay gradient + label */}
+        <div style={{
+          position:"absolute", inset:0,
+          background:"linear-gradient(180deg, transparent 0%, rgba(8,12,18,0.75) 100%)",
+          display:"flex", flexDirection:"column", justifyContent:"flex-end",
+          padding:"12px 16px",
+        }}>
+          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+            <div>
+              <div style={{color:glass.white, fontWeight:600, fontSize:13, fontFamily:font}}>{centers.length} centers mapped</div>
+              <div style={{color:glass.textSecond, fontSize:11, marginTop:1}}>Tap to explore full map</div>
+            </div>
+            <div style={{
+              width:32, height:32, borderRadius:10,
+              background:"rgba(255,255,255,0.14)", backdropFilter:"blur(10px)",
+              border:`1px solid ${glass.borderHi}`,
+              display:"flex", alignItems:"center", justifyContent:"center",
+              color:glass.white,
+            }}>{Ico.expand}</div>
+          </div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+// ─── Full Interactive Map Modal ─────────────────────────────────
+function FullMapModal({ centers, onClose, t }) {
+  const [selected, setSelected] = useState(null);
+  const W = 300, H = 480;
+
+  const openInGoogleMaps = (c) => {
+    const url = c.lat && c.lng
+      ? `https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lng}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.name+' '+c.address+' Philippines')}`;
+    window.open(url, "_blank");
+  };
+
+  return (
+    <div style={{
+      position:"fixed", inset:0, zIndex:999,
+      background:"rgba(5,8,14,0.92)",
+      backdropFilter:"blur(10px)",
+      display:"flex", flexDirection:"column",
+      maxWidth:430, margin:"0 auto",
+    }}>
+      {/* Header */}
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"18px 20px 14px", flexShrink:0}}>
+        <div>
+          <div style={{color:glass.white, fontWeight:700, fontSize:18, fontFamily:font}}>Safe Zones Map</div>
+          <div style={{color:glass.textSecond, fontSize:12, marginTop:2}}>{centers.length} evacuation centers</div>
+        </div>
+        <button onClick={onClose} style={{
+          width:36, height:36, borderRadius:11,
+          background:glass.card, backdropFilter:"blur(20px)",
+          border:`1px solid ${glass.border}`,
+          color:glass.white, cursor:"pointer",
+          display:"flex", alignItems:"center", justifyContent:"center",
+        }}>{Ico.close}</button>
+      </div>
+
+      {/* Map */}
+      <div style={{flex:"0 0 auto", padding:"0 20px 14px", overflow:"hidden"}}>
+        <div style={{
+          position:"relative", borderRadius:20, overflow:"hidden",
+          border:`1px solid ${glass.border}`,
+          background:"linear-gradient(160deg, rgba(20,40,70,0.6), rgba(10,20,35,0.8))",
+          maxHeight:"42vh",
+        }}>
+          <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{display:"block", maxHeight:"42vh"}}>
+            <g fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.10)" strokeWidth="0.7" transform={`scale(${W/80},${H/170})`}>
+              <path d="M58 18 L66 14 L72 20 L70 32 L74 42 L68 56 L60 64 L52 70 L46 80 L40 88 L36 96 L40 100 L36 106 L28 108 L24 100 L28 90 L26 80 L30 68 L34 56 L38 44 L42 32 L48 24 Z"/>
+              <path d="M44 118 L52 114 L60 118 L58 126 L50 130 L42 126 Z"/>
+              <path d="M62 122 L70 120 L76 126 L72 134 L64 132 Z"/>
+              <path d="M50 134 L58 132 L62 140 L56 146 L48 142 Z"/>
+              <path d="M58 150 L70 146 L82 150 L88 160 L84 172 L74 180 L62 178 L52 170 L48 160 Z"/>
+              <path d="M18 70 L24 68 L26 84 L22 100 L16 98 L14 84 Z"/>
+            </g>
+            {centers.map((c,i)=>{
+              const p = project(c.lat, c.lng, W, H);
+              const isSel = selected===i;
+              return (
+                <MapPin key={i} x={p.x} y={p.y} active={isSel}
+                  color={isSel ? "#F39C12" : "#4A9EFF"} size={isSel?1.3:1}
+                  onClick={()=>setSelected(isSel?null:i)}/>
+              );
+            })}
+          </svg>
+        </div>
+      </div>
+
+      {/* Selected center detail card */}
+      {selected!==null && (
+        <div style={{padding:"0 20px 14px", flexShrink:0}}>
+          <div style={{...glassCard({padding:"14px 16px", borderRadius:16}), border:"1px solid rgba(243,156,18,0.35)"}}>
+            <div style={{display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:10}}>
+              <div style={{flex:1}}>
+                <div style={{color:glass.textPrimary, fontWeight:600, fontSize:14, fontFamily:font, marginBottom:4}}>{centers[selected].name}</div>
+                <div style={{color:glass.textSecond, fontSize:12, display:"flex", gap:5, alignItems:"center"}}>{Ico.pin}{centers[selected].address}</div>
+                <div style={{display:"flex", gap:6, marginTop:8, flexWrap:"wrap"}}>
+                  <Pill small>{centers[selected].type}</Pill>
+                  <Pill small color="rgba(48,191,160,0.8)">👥 {centers[selected].capacity}</Pill>
+                </div>
+              </div>
+              <button onClick={()=>openInGoogleMaps(centers[selected])} style={{
+                background:"rgba(74,158,255,0.18)", border:"1px solid rgba(74,158,255,0.3)",
+                borderRadius:11, padding:"8px 12px", color:"rgba(100,180,255,0.95)",
+                fontWeight:600, fontSize:11, cursor:"pointer", fontFamily:font,
+                display:"flex", alignItems:"center", gap:5, flexShrink:0, whiteSpace:"nowrap",
+              }}>{Ico.maps} Open</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Scrollable list below map */}
+      <div style={{flex:1, overflowY:"auto", padding:"4px 20px 30px"}}>
+        <div style={{color:glass.textTertiary, fontSize:10, fontWeight:600, letterSpacing:1.5, marginBottom:10, textTransform:"uppercase"}}>All Centers</div>
+        <div style={{display:"flex", flexDirection:"column", gap:7}}>
+          {centers.map((c,i)=>(
+            <button key={i} onClick={()=>setSelected(i)} style={{
+              textAlign:"left", border:"none", padding:0, cursor:"pointer", width:"100%",
+            }}>
+              <div style={{
+                ...glassCard({padding:"11px 14px", borderRadius:14}),
+                border: selected===i ? "1px solid rgba(243,156,18,0.4)" : `1px solid ${glass.border}`,
+                background: selected===i ? "rgba(243,156,18,0.08)" : glass.card,
+                display:"flex", alignItems:"center", gap:10,
+              }}>
+                <span style={{width:6,height:6,borderRadius:99,background:selected===i?"#F39C12":"#4A9EFF",flexShrink:0}}/>
+                <div style={{flex:1, minWidth:0}}>
+                  <div style={{color:glass.textPrimary, fontSize:13, fontWeight:500, fontFamily:font, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>{c.name}</div>
+                  <div style={{color:glass.textTertiary, fontSize:11, marginTop:1}}>{c.city}</div>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Evac Screen ──────────────────────────────────────────────────
 function EvacScreen({ lang, t }) {
   const [search, setSearch] = useState("");
@@ -631,6 +834,7 @@ function EvacScreen({ lang, t }) {
   const [myCenters, setMyCenters] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
   const [nc, setNc] = useState({name:"",address:"",notes:""});
+  const [showMap, setShowMap] = useState(false);
 
   const filtered = EVAC_DB.filter(e=>{
     const mr = region==="All" || e.region===region;
@@ -649,6 +853,13 @@ function EvacScreen({ lang, t }) {
 
   return (
     <div style={{padding:"20px 20px 0"}}>
+      {/* Interactive map preview — tap to expand */}
+      <div style={{marginBottom:16}}>
+        <MiniMapPreview centers={filtered} onExpand={()=>setShowMap(true)}/>
+      </div>
+
+      {showMap && <FullMapModal centers={filtered} onClose={()=>setShowMap(false)} t={t}/>}
+
       {/* Info */}
       <div style={{...glassCard({padding:"13px 16px", marginBottom:16, borderRadius:16}),
         background:"rgba(48,191,160,0.08)", border:"1px solid rgba(48,191,160,0.15)"}}>
