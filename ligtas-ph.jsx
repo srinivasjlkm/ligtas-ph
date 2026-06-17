@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 // ─────────────────────────────────────────────────────────────────
 // DESIGN DIRECTION
@@ -626,82 +626,104 @@ function HotlinesScreen({ lang, t }) {
   );
 }
 
-// ─── Lightweight Philippines projection ────────────────────────
-// Simple linear lat/lng → x/y box projection tuned to PH bounding box,
-// good enough for a stylised offline pin map (not a literal coastline).
-const PH_BOUNDS = { latMin:4.5, latMax:21.5, lngMin:116.5, lngMax:127 };
-function project(lat, lng, w, h) {
-  const x = ((lng - PH_BOUNDS.lngMin) / (PH_BOUNDS.lngMax - PH_BOUNDS.lngMin)) * w;
-  const y = h - ((lat - PH_BOUNDS.latMin) / (PH_BOUNDS.latMax - PH_BOUNDS.latMin)) * h;
-  return { x, y };
+// ─── Leaflet loader (CDN, loaded once) ──────────────────────────
+// We load Leaflet's JS + CSS from a CDN at runtime since this gives us
+// real OpenStreetMap tiles — accurate coastlines, city/region labels,
+// and native pinch-to-zoom/pan — matching a real Google-Maps-like feel.
+// This requires internet only while the map screen is open; every other
+// screen in the app remains fully offline.
+let _leafletLoadPromise = null;
+function loadLeaflet() {
+  if (window.L) return Promise.resolve(window.L);
+  if (_leafletLoadPromise) return _leafletLoadPromise;
+  _leafletLoadPromise = new Promise((resolve, reject) => {
+    const css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+    document.head.appendChild(css);
+    const script = document.createElement("script");
+    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    script.async = true;
+    script.onload = () => resolve(window.L);
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+  return _leafletLoadPromise;
 }
 
-// Simplified PH landmass silhouette (stylised blob group, not geographically precise —
-// purely for visual context behind the pins, fully offline / no map tiles needed)
-const PH_SILHOUETTE = (
-  <g fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.10)" strokeWidth="0.5">
-    {/* Luzon */}
-    <path d="M58 18 L66 14 L72 20 L70 32 L74 42 L68 56 L60 64 L52 70 L46 80 L40 88 L36 96 L40 100 L36 106 L28 108 L24 100 L28 90 L26 80 L30 68 L34 56 L38 44 L42 32 L48 24 Z"/>
-    {/* Visayas cluster */}
-    <path d="M44 118 L52 114 L60 118 L58 126 L50 130 L42 126 Z"/>
-    <path d="M62 122 L70 120 L76 126 L72 134 L64 132 Z"/>
-    <path d="M50 134 L58 132 L62 140 L56 146 L48 142 Z"/>
-    {/* Mindanao */}
-    <path d="M58 150 L70 146 L82 150 L88 160 L84 172 L74 180 L62 178 L52 170 L48 160 Z"/>
-    {/* Palawan sliver */}
-    <path d="M18 70 L24 68 L26 84 L22 100 L16 98 L14 84 Z"/>
-  </g>
-);
+// Dark-themed tile layer (CartoDB Dark Matter — free, no API key) so the
+// map matches the app's visual language while still being real map data.
+const TILE_URL = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+const TILE_ATTR = '© OpenStreetMap, © CARTO';
 
-// ─── Map Pin (shared) ──────────────────────────────────────────
-function MapPin({ x, y, active, color="#4A9EFF", size=1, onClick }) {
-  return (
-    <g transform={`translate(${x},${y})`} onClick={onClick} style={{cursor:onClick?"pointer":"default"}}>
-      {active && <circle r={9*size} fill={color} opacity="0.25"><animate attributeName="r" values={`${6*size};${11*size};${6*size}`} dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.35;0.05;0.35" dur="2s" repeatCount="indefinite"/></circle>}
-      <circle r={4.2*size} fill={color} stroke="rgba(8,12,18,0.8)" strokeWidth="1"/>
-      <circle r={1.4*size} fill="rgba(255,255,255,0.9)"/>
-    </g>
-  );
-}
-
-// ─── Mini Map Preview (collapsed, tappable to expand) ──────────
+// ─── Mini Map Preview (collapsed, tappable to expand) ────────────
 function MiniMapPreview({ centers, onExpand }) {
-  const W = 200, H = 170;
+  const mapRef = useRef(null);
+  const containerRef = useRef(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let map;
+    loadLeaflet().then(L => {
+      if (!containerRef.current || mapRef.current) return;
+      map = L.map(containerRef.current, {
+        center: [12.5, 122],
+        zoom: 5,
+        zoomControl: false,
+        attributionControl: false,
+        dragging: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        touchZoom: false,
+        boxZoom: false,
+        keyboard: false,
+      });
+      L.tileLayer(TILE_URL, { maxZoom: 18, subdomains:"abcd" }).addTo(map);
+      centers.forEach(c => {
+        if (!c.lat || !c.lng) return;
+        L.circleMarker([c.lat, c.lng], {
+          radius: 4, color:"#0B0E14", weight:1,
+          fillColor:"#4A9EFF", fillOpacity:0.95,
+        }).addTo(map);
+      });
+      mapRef.current = map;
+      setLoaded(true);
+    }).catch(()=>{});
+    return () => { if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; } };
+  }, []);
+
   return (
     <button onClick={onExpand} style={{
-      width:"100%", border:"none", padding:0, cursor:"pointer",
+      width:"100%", border:`1px solid ${glass.border}`, padding:0, cursor:"pointer",
       borderRadius:20, overflow:"hidden", position:"relative",
-      background: glass.card,
-      backdropFilter:"blur(20px) saturate(180%)",
-      WebkitBackdropFilter:"blur(20px) saturate(180%)",
-      border1:`1px solid ${glass.border}`,
+      background:"#0F1B2E", WebkitTapHighlightColor:"transparent",
+      appearance:"none", margin:0, display:"block",
     }}>
-      <div style={{position:"relative", border:`1px solid ${glass.border}`, borderRadius:20, overflow:"hidden"}}>
-        <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="170" style={{display:"block", background:"linear-gradient(160deg, rgba(20,40,70,0.5), rgba(10,20,35,0.7))"}}>
-          {PH_SILHOUETTE}
-          {centers.slice(0,60).map((c,i)=>{
-            const p = project(c.lat, c.lng, W, H);
-            return <MapPin key={i} x={p.x} y={p.y} color="#4A9EFF" size={0.7}/>;
-          })}
-        </svg>
+      <div style={{position:"relative", borderRadius:20, overflow:"hidden", background:"#0F1B2E", height:180}}>
+        <div ref={containerRef} style={{width:"100%", height:"100%", pointerEvents:"none"}}/>
+        {!loaded && (
+          <div style={{position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", color:"rgba(255,255,255,0.4)", fontSize:12, fontFamily:font}}>
+            Loading map…
+          </div>
+        )}
         {/* Overlay gradient + label */}
         <div style={{
           position:"absolute", inset:0,
-          background:"linear-gradient(180deg, transparent 0%, rgba(8,12,18,0.75) 100%)",
+          background:"linear-gradient(180deg, transparent 40%, rgba(5,8,14,0.88) 100%)",
           display:"flex", flexDirection:"column", justifyContent:"flex-end",
-          padding:"12px 16px",
+          padding:"12px 16px", pointerEvents:"none",
         }}>
           <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
             <div>
-              <div style={{color:glass.white, fontWeight:600, fontSize:13, fontFamily:font}}>{centers.length} centers mapped</div>
-              <div style={{color:glass.textSecond, fontSize:11, marginTop:1}}>Tap to explore full map</div>
+              <div style={{color:"#FFFFFF", fontWeight:600, fontSize:13, fontFamily:font}}>{centers.length} centers mapped</div>
+              <div style={{color:"rgba(255,255,255,0.7)", fontSize:11, marginTop:1}}>Tap to explore full map</div>
             </div>
             <div style={{
               width:32, height:32, borderRadius:10,
-              background:"rgba(255,255,255,0.14)", backdropFilter:"blur(10px)",
-              border:`1px solid ${glass.borderHi}`,
+              background:"rgba(255,255,255,0.18)",
+              border:`1px solid rgba(255,255,255,0.28)`,
               display:"flex", alignItems:"center", justifyContent:"center",
-              color:glass.white,
+              color:"#FFFFFF",
             }}>{Ico.expand}</div>
           </div>
         </div>
@@ -710,10 +732,13 @@ function MiniMapPreview({ centers, onExpand }) {
   );
 }
 
-// ─── Full Interactive Map Modal ─────────────────────────────────
+// ─── Full Interactive Map Modal (real pan/zoom via Leaflet) ─────
 function FullMapModal({ centers, onClose, t }) {
   const [selected, setSelected] = useState(null);
-  const W = 300, H = 480;
+  const mapRef = useRef(null);
+  const containerRef = useRef(null);
+  const markersRef = useRef([]);
+  const [loaded, setLoaded] = useState(false);
 
   const openInGoogleMaps = (c) => {
     const url = c.lat && c.lng
@@ -722,77 +747,114 @@ function FullMapModal({ centers, onClose, t }) {
     window.open(url, "_blank");
   };
 
+  useEffect(() => {
+    let map;
+    loadLeaflet().then(L => {
+      if (!containerRef.current || mapRef.current) return;
+      map = L.map(containerRef.current, {
+        center: [12.5, 122],
+        zoom: 6,
+        zoomControl: true,
+        attributionControl: true,
+        minZoom: 5,
+        maxZoom: 13, // region/city level — not street/barangay level
+      });
+      L.tileLayer(TILE_URL, { maxZoom: 18, subdomains:"abcd", attribution: TILE_ATTR }).addTo(map);
+
+      centers.forEach((c,i) => {
+        if (!c.lat || !c.lng) return;
+        const marker = L.circleMarker([c.lat, c.lng], {
+          radius: 6, color:"#0B0E14", weight:1.5,
+          fillColor:"#4A9EFF", fillOpacity:0.95,
+        }).addTo(map);
+        marker.on("click", () => setSelected(i));
+        markersRef.current[i] = marker;
+      });
+
+      mapRef.current = map;
+      setLoaded(true);
+    }).catch(()=>{});
+    return () => {
+      if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; }
+      markersRef.current = [];
+    };
+  }, []);
+
+  // Highlight selected marker + fly to it
+  useEffect(() => {
+    if (!mapRef.current || selected===null) return;
+    const c = centers[selected];
+    if (!c || !c.lat) return;
+    mapRef.current.flyTo([c.lat, c.lng], Math.max(mapRef.current.getZoom(), 10), { duration: 0.5 });
+    markersRef.current.forEach((m,i) => {
+      if (!m) return;
+      m.setStyle(i===selected ? {fillColor:"#F39C12", radius:9} : {fillColor:"#4A9EFF", radius:6});
+    });
+  }, [selected]);
+
   return (
     <div style={{
-      position:"fixed", inset:0, zIndex:999,
-      background:"rgba(5,8,14,0.92)",
-      backdropFilter:"blur(10px)",
+      position:"fixed", top:0, left:0, right:0, bottom:0, zIndex:999,
+      background:"#080C12",
       display:"flex", flexDirection:"column",
       maxWidth:430, margin:"0 auto",
+      WebkitOverflowScrolling:"touch",
     }}>
       {/* Header */}
-      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"18px 20px 14px", flexShrink:0}}>
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"18px 20px 14px", flexShrink:0, background:"#080C12"}}>
         <div>
-          <div style={{color:glass.white, fontWeight:700, fontSize:18, fontFamily:font}}>Safe Zones Map</div>
-          <div style={{color:glass.textSecond, fontSize:12, marginTop:2}}>{centers.length} evacuation centers</div>
+          <div style={{color:"#FFFFFF", fontWeight:700, fontSize:18, fontFamily:font}}>Safe Zones Map</div>
+          <div style={{color:"rgba(255,255,255,0.6)", fontSize:12, marginTop:2}}>{centers.length} evacuation centers</div>
         </div>
         <button onClick={onClose} style={{
           width:36, height:36, borderRadius:11,
-          background:glass.card, backdropFilter:"blur(20px)",
-          border:`1px solid ${glass.border}`,
-          color:glass.white, cursor:"pointer",
+          background:"#1A2433",
+          border:`1px solid rgba(255,255,255,0.15)`,
+          color:"#FFFFFF", cursor:"pointer",
           display:"flex", alignItems:"center", justifyContent:"center",
+          appearance:"none", padding:0, flexShrink:0,
         }}>{Ico.close}</button>
       </div>
 
-      {/* Map */}
-      <div style={{flex:"0 0 auto", padding:"0 20px 14px", overflow:"hidden"}}>
+      {/* Real interactive map — pinch/scroll to zoom, drag to pan, region/city level only */}
+      <div style={{flex:"0 0 auto", padding:"0 20px 14px", background:"#080C12"}}>
         <div style={{
           position:"relative", borderRadius:20, overflow:"hidden",
-          border:`1px solid ${glass.border}`,
-          background:"linear-gradient(160deg, rgba(20,40,70,0.6), rgba(10,20,35,0.8))",
-          maxHeight:"42vh",
+          border:`1px solid rgba(255,255,255,0.12)`,
+          background:"#0F1B2E", height:"42vh",
         }}>
-          <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{display:"block", maxHeight:"42vh"}}>
-            <g fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.10)" strokeWidth="0.7" transform={`scale(${W/80},${H/170})`}>
-              <path d="M58 18 L66 14 L72 20 L70 32 L74 42 L68 56 L60 64 L52 70 L46 80 L40 88 L36 96 L40 100 L36 106 L28 108 L24 100 L28 90 L26 80 L30 68 L34 56 L38 44 L42 32 L48 24 Z"/>
-              <path d="M44 118 L52 114 L60 118 L58 126 L50 130 L42 126 Z"/>
-              <path d="M62 122 L70 120 L76 126 L72 134 L64 132 Z"/>
-              <path d="M50 134 L58 132 L62 140 L56 146 L48 142 Z"/>
-              <path d="M58 150 L70 146 L82 150 L88 160 L84 172 L74 180 L62 178 L52 170 L48 160 Z"/>
-              <path d="M18 70 L24 68 L26 84 L22 100 L16 98 L14 84 Z"/>
-            </g>
-            {centers.map((c,i)=>{
-              const p = project(c.lat, c.lng, W, H);
-              const isSel = selected===i;
-              return (
-                <MapPin key={i} x={p.x} y={p.y} active={isSel}
-                  color={isSel ? "#F39C12" : "#4A9EFF"} size={isSel?1.3:1}
-                  onClick={()=>setSelected(isSel?null:i)}/>
-              );
-            })}
-          </svg>
+          <div ref={containerRef} style={{width:"100%", height:"100%"}}/>
+          {!loaded && (
+            <div style={{position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", color:"rgba(255,255,255,0.4)", fontSize:13, fontFamily:font}}>
+              Loading map…
+            </div>
+          )}
         </div>
+        <div style={{color:"rgba(255,255,255,0.35)", fontSize:11, marginTop:6, textAlign:"center"}}>Pinch or scroll to zoom · drag to pan</div>
       </div>
 
       {/* Selected center detail card */}
-      {selected!==null && (
-        <div style={{padding:"0 20px 14px", flexShrink:0}}>
-          <div style={{...glassCard({padding:"14px 16px", borderRadius:16}), border:"1px solid rgba(243,156,18,0.35)"}}>
+      {selected!==null && centers[selected] && (
+        <div style={{padding:"0 20px 14px", flexShrink:0, background:"#080C12"}}>
+          <div style={{
+            background:"#141E2A", border:"1px solid rgba(243,156,18,0.4)",
+            borderRadius:16, padding:"14px 16px",
+          }}>
             <div style={{display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:10}}>
               <div style={{flex:1}}>
-                <div style={{color:glass.textPrimary, fontWeight:600, fontSize:14, fontFamily:font, marginBottom:4}}>{centers[selected].name}</div>
-                <div style={{color:glass.textSecond, fontSize:12, display:"flex", gap:5, alignItems:"center"}}>{Ico.pin}{centers[selected].address}</div>
+                <div style={{color:"#F0F4F8", fontWeight:600, fontSize:14, fontFamily:font, marginBottom:4}}>{centers[selected].name}</div>
+                <div style={{color:"rgba(255,255,255,0.6)", fontSize:12, display:"flex", gap:5, alignItems:"center"}}>{Ico.pin}{centers[selected].address}</div>
                 <div style={{display:"flex", gap:6, marginTop:8, flexWrap:"wrap"}}>
                   <Pill small>{centers[selected].type}</Pill>
                   <Pill small color="rgba(48,191,160,0.8)">👥 {centers[selected].capacity}</Pill>
                 </div>
               </div>
               <button onClick={()=>openInGoogleMaps(centers[selected])} style={{
-                background:"rgba(74,158,255,0.18)", border:"1px solid rgba(74,158,255,0.3)",
-                borderRadius:11, padding:"8px 12px", color:"rgba(100,180,255,0.95)",
+                background:"rgba(74,158,255,0.22)", border:"1px solid rgba(74,158,255,0.4)",
+                borderRadius:11, padding:"8px 12px", color:"#9CCBFF",
                 fontWeight:600, fontSize:11, cursor:"pointer", fontFamily:font,
                 display:"flex", alignItems:"center", gap:5, flexShrink:0, whiteSpace:"nowrap",
+                appearance:"none",
               }}>{Ico.maps} Open</button>
             </div>
           </div>
@@ -800,26 +862,23 @@ function FullMapModal({ centers, onClose, t }) {
       )}
 
       {/* Scrollable list below map */}
-      <div style={{flex:1, overflowY:"auto", padding:"4px 20px 30px"}}>
-        <div style={{color:glass.textTertiary, fontSize:10, fontWeight:600, letterSpacing:1.5, marginBottom:10, textTransform:"uppercase"}}>All Centers</div>
+      <div style={{flex:1, overflowY:"auto", padding:"4px 20px 30px", background:"#080C12", WebkitOverflowScrolling:"touch"}}>
+        <div style={{color:"rgba(255,255,255,0.4)", fontSize:10, fontWeight:600, letterSpacing:1.5, marginBottom:10, textTransform:"uppercase"}}>All Centers</div>
         <div style={{display:"flex", flexDirection:"column", gap:7}}>
           {centers.map((c,i)=>(
-            <button key={i} onClick={()=>setSelected(i)} style={{
-              textAlign:"left", border:"none", padding:0, cursor:"pointer", width:"100%",
+            <div key={i} onClick={()=>setSelected(i)} role="button" tabIndex={0} style={{
+              textAlign:"left", cursor:"pointer", width:"100%", boxSizing:"border-box",
+              border: selected===i ? "1px solid rgba(243,156,18,0.45)" : "1px solid rgba(255,255,255,0.10)",
+              background: selected===i ? "#2A2010" : "#141E2A",
+              borderRadius:14, padding:"11px 14px",
+              display:"flex", alignItems:"center", gap:10,
             }}>
-              <div style={{
-                ...glassCard({padding:"11px 14px", borderRadius:14}),
-                border: selected===i ? "1px solid rgba(243,156,18,0.4)" : `1px solid ${glass.border}`,
-                background: selected===i ? "rgba(243,156,18,0.08)" : glass.card,
-                display:"flex", alignItems:"center", gap:10,
-              }}>
-                <span style={{width:6,height:6,borderRadius:99,background:selected===i?"#F39C12":"#4A9EFF",flexShrink:0}}/>
-                <div style={{flex:1, minWidth:0}}>
-                  <div style={{color:glass.textPrimary, fontSize:13, fontWeight:500, fontFamily:font, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>{c.name}</div>
-                  <div style={{color:glass.textTertiary, fontSize:11, marginTop:1}}>{c.city}</div>
-                </div>
+              <span style={{width:6,height:6,minWidth:6,borderRadius:99,background:selected===i?"#F39C12":"#4A9EFF",flexShrink:0}}/>
+              <div style={{flex:1, minWidth:0}}>
+                <div style={{color:"#F0F4F8", fontSize:13, fontWeight:500, fontFamily:font, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>{c.name}</div>
+                <div style={{color:"rgba(255,255,255,0.4)", fontSize:11, marginTop:1}}>{c.city}</div>
               </div>
-            </button>
+            </div>
           ))}
         </div>
       </div>
